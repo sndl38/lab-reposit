@@ -62,6 +62,17 @@ class TestIncomeModel(unittest.TestCase):
         with self.assertRaises(IndexError):
             model.remove_income(0)
 
+    def test_save_to_file(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "result.txt"
+            model = IncomeModel()
+
+            model.add_income("2024.03.28", "Зарплата", "50000")
+            model.save_to_file(file_path)
+
+            text = file_path.read_text(encoding="utf-8")
+            self.assertIn('Доходы 2024.03.28 "Зарплата" 50000', text)
+
     def test_load_from_file_skips_invalid_lines(self) -> None:
         with TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "data.txt"

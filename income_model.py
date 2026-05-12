@@ -24,6 +24,13 @@ class Income:
             str(self.amount),
         )
 
+    def to_file_line(self) -> str:
+        safe_source = self.source.replace('"', "'")
+        return (
+            f'Доходы {self.income_date.strftime(DATE_FORMAT)} '
+            f'"{safe_source}" {self.amount}'
+        )
+
 
 class IncomeParser:
     LINE_PATTERN = re.compile(
@@ -45,7 +52,6 @@ class IncomeParser:
             )
 
         date_text, source, amount_text = match.groups()
-
         return cls.create_income(date_text, source, amount_text)
 
     @staticmethod
@@ -109,11 +115,26 @@ class IncomeModel:
         income = IncomeParser.create_income(date_text, source, amount_text)
         self._incomes.append(income)
 
+    def add_income_object(self, income: Income) -> None:
+        self._incomes.append(income)
+
     def remove_income(self, index: int) -> None:
         if index < 0 or index >= len(self._incomes):
             raise IndexError("Некорректный индекс удаляемого объекта.")
 
         del self._incomes[index]
+
+    def remove_by_condition(self, condition) -> int:
+        old_count = len(self._incomes)
+        self._incomes = [
+            income for income in self._incomes if not condition(income)
+        ]
+        return old_count - len(self._incomes)
+
+    def save_to_file(self, file_path: Path) -> None:
+        with open(file_path, "w", encoding="utf-8") as file:
+            for income in self._incomes:
+                file.write(income.to_file_line() + "\n")
 
     def get_table_rows(self) -> list[tuple[str, str, str]]:
         return [income.to_row() for income in self._incomes]

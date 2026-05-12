@@ -5,9 +5,13 @@ class Income {
     - source: str
     - amount: int
     + to_row(): tuple
+    + to_file_line(): str
 }
 
 class IncomeParseError {
+}
+
+class CommandError {
 }
 
 class IncomeParser {
@@ -20,8 +24,18 @@ class IncomeModel {
     + incomes: list[Income]
     + load_from_file(file_path: Path, log_path: Path): int
     + add_income(date_text: str, source: str, amount_text: str): void
+    + add_income_object(income: Income): void
     + remove_income(index: int): void
+    + remove_by_condition(condition): int
+    + save_to_file(file_path: Path): void
     + get_table_rows(): list
+}
+
+class CommandProcessor {
+    - model: IncomeModel
+    - base_dir: Path
+    + execute_file(command_path: Path): list
+    + execute_line(line: str): str
 }
 
 class IncomeView {
@@ -29,7 +43,9 @@ class IncomeView {
     - model: IncomeModel
     - data_path: Path
     - log_path: Path
+    - command_processor: CommandProcessor
     + load_data(): void
+    + open_command_file(): void
     + update_table(): void
     + add_income(): void
     + delete_selected_income(): void
@@ -39,6 +55,9 @@ IncomeParser ..> Income
 IncomeParser ..> IncomeParseError
 IncomeModel o-- Income
 IncomeModel ..> IncomeParser
+CommandProcessor --> IncomeModel
+CommandProcessor ..> CommandError
 IncomeView --> IncomeModel
+IncomeView --> CommandProcessor
 
 @enduml
