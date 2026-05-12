@@ -1,0 +1,44 @@
+@startuml
+
+class Income {
+    - income_date: date
+    - source: str
+    - amount: int
+    + to_row(): tuple
+}
+
+class IncomeParseError {
+}
+
+class IncomeParser {
+    + parse_line(line: str): Income
+    + create_income(date_text: str, source: str, amount_text: str): Income
+}
+
+class IncomeModel {
+    - _incomes: list[Income]
+    + incomes: list[Income]
+    + load_from_file(file_path: Path, log_path: Path): int
+    + add_income(date_text: str, source: str, amount_text: str): void
+    + remove_income(index: int): void
+    + get_table_rows(): list
+}
+
+class IncomeView {
+    - root: Tk
+    - model: IncomeModel
+    - data_path: Path
+    - log_path: Path
+    + load_data(): void
+    + update_table(): void
+    + add_income(): void
+    + delete_selected_income(): void
+}
+
+IncomeParser ..> Income
+IncomeParser ..> IncomeParseError
+IncomeModel o-- Income
+IncomeModel ..> IncomeParser
+IncomeView --> IncomeModel
+
+@enduml
